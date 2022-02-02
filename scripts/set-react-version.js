@@ -15,7 +15,7 @@ const pacote = require("pacote");
 const VALID_TAGS = ["canary-macos", "canary-windows", "main", "nightly"];
 const REACT_NATIVE_VERSIONS = {
   "canary-macos": "^0.66",
-  "canary-windows": "^0.67.0-0",
+  "canary-windows": "^0.68.0-0",
 };
 
 /**
