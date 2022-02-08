@@ -20,10 +20,10 @@ jobs:
       - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
       - name: Install npm dependencies
-        uses: ./.github/actions/yarn
+        uses: ./.github/actions/npm
       - name: Lint commit message
         run: |
-          yarn lint:commit
+          npm run lint:commit
   lint-test:
     name: "lint + test"
     strategy:
@@ -42,17 +42,17 @@ jobs:
           platform: node
       - name: Deduplicate packages
         run: |
-          yarn dedupe --check
+          npm find-dupes --no-audit --no-fund
       - name: Install npm dependencies
-        uses: ./.github/actions/yarn
+        uses: ./.github/actions/npm
       - name: Validate generated files
         if: ${{ github.event_name == 'pull_request' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          yarn codegen
+          npm run codegen
           if [[ -n "$GITHUB_TOKEN" ]]; then
-            git diff | yarn suggestion-bot
+            git diff | npx suggestion-bot
           fi
           git diff --exit-code
         shell: bash
@@ -90,22 +90,22 @@ jobs:
           #       account.
           scripts/prettier-diff.js $(git ls-files '*.js' '*.yml' 'test/**/*.json') || true
           echo "::add-matcher::.github/eslint-stylish.json"
-          yarn lint:js
+          npm run lint:js
           echo "::remove-matcher owner=eslint-stylish::"
-          yarn tsc
-          yarn test:js --ci
+          npm run tsc
+          npm run test:js --ci
       - name: ktlint
         if: ${{ matrix.platform == 'macos' }}
         run: |
           brew install ktlint
           echo "::add-matcher::.github/ktlint.json"
-          yarn lint:kt
+          npm run lint:kt
           echo "::remove-matcher owner=ktlint::"
       - name: SwiftFormat
         if: ${{ github.event_name == 'pull_request' && matrix.platform == 'macos' }}
         run: |
           echo "::add-matcher::.github/swiftformat.json"
-          yarn format:swift --lint
+          npm run format:swift --lint
           echo "::remove-matcher owner=swiftformat::"
       - name: SwiftLint
         if: ${{ matrix.platform == 'macos' }}
@@ -133,16 +133,16 @@ jobs:
           # https://github.com/facebook/react-native/issues/30036 and
           # https://github.com/microsoft/react-native-macos/issues/620 for more
           # details.
-          yarn
+          npm install
           npm run set-react-version main
           rm example/ios/Podfile.lock
       - name: Install npm dependencies
-        uses: ./.github/actions/yarn
+        uses: ./.github/actions/npm
         with:
           immutable: ${{ github.event_name != 'schedule' }}
       - name: Bundle JavaScript
         run: |
-          yarn build:ios || yarn build:ios
+          npm run build:ios || npm run build:ios
         working-directory: example
       - name: Install Pods
         uses: ./.github/actions/cocoapods
@@ -155,7 +155,7 @@ jobs:
         working-directory: example
       - name: Test `react-native config`
         run: |
-          yarn jest
+          npx jest
         working-directory: example
       - name: Test
         run: |
@@ -183,7 +183,7 @@ jobs:
           platform: ${{ matrix.template }}
       - name: Bundle JavaScript
         run: |
-          yarn build:ios || yarn build:ios
+          npm run build:ios || npm run build:ios
         working-directory: template-example
       - name: Determine project directory
         id: configure
@@ -223,20 +223,20 @@ jobs:
       - name: Set up react-native@nightly
         if: ${{ github.event_name == 'schedule' }}
         run: |
-          yarn
+          npm install
           npm run set-react-version nightly
         shell: bash
       - name: Install npm dependencies
-        uses: ./.github/actions/yarn
+        uses: ./.github/actions/npm
         with:
           immutable: ${{ github.event_name != 'schedule' }}
       - name: Test `react-native config`
         run: |
-          yarn jest
+          npx jest
         working-directory: example
       - name: Bundle JavaScript
         run: |
-          yarn build:android || yarn build:android
+          npm run build:android || npm run build:android
         shell: bash
         working-directory: example
       - name: Build
@@ -265,7 +265,7 @@ jobs:
           platform: ${{ matrix.template }}
       - name: Bundle JavaScript
         run: |
-          yarn build:android || yarn build:android
+          npm run build:android || npm run build:android
         shell: bash
         working-directory: template-example
       - name: Build
@@ -291,16 +291,16 @@ jobs:
       - name: Set up react-native@canary
         if: ${{ github.event_name == 'schedule' }}
         run: |
-          yarn
+          npm install
           npm run set-react-version canary-macos
           rm example/macos/Podfile.lock
       - name: Install npm dependencies
-        uses: ./.github/actions/yarn
+        uses: ./.github/actions/npm
         with:
           immutable: ${{ github.event_name != 'schedule' }}
       - name: Bundle JavaScript
         run: |
-          yarn build:macos || yarn build:macos
+          npm run build:macos || npm run build:macos
         working-directory: example
       - name: Install Pods
         uses: ./.github/actions/cocoapods
@@ -313,7 +313,7 @@ jobs:
         working-directory: example
       - name: Test `react-native config`
         run: |
-          yarn jest
+          npx jest
         working-directory: example
       - name: Test
         if: ${{ github.event_name != 'schedule' }}
@@ -347,7 +347,7 @@ jobs:
           platform: ${{ matrix.template }}
       - name: Bundle JavaScript
         run: |
-          yarn build:macos || yarn build:macos
+          npm run build:macos || npm run build:macos
         working-directory: template-example
       - name: Determine project directory
         id: configure
@@ -383,21 +383,21 @@ jobs:
       - name: Set up react-native@canary
         if: ${{ github.event_name == 'schedule' }}
         run: |
-          yarn
+          npm install
           npm run set-react-version canary-windows
         shell: bash
       - name: Install npm dependencies
-        uses: ./.github/actions/yarn
+        uses: ./.github/actions/npm
         with:
           immutable: ${{ github.event_name != 'schedule' }}
       - name: Build bundle and create solution
         run: |
-          yarn build:windows
-          yarn install-windows-test-app --use-nuget
+          npm run build:windows
+          npx install-windows-test-app --use-nuget
         working-directory: example
       - name: Test `react-native config`
         run: |
-          yarn jest
+          npx jest
         working-directory: example
       - name: Install NuGet packages
         run: |
@@ -434,9 +434,9 @@ jobs:
           platform: ${{ matrix.template }}
       - name: Build bundle and create solution
         run: |
-          yarn build:windows
-          if ("${{ matrix.template }}" -eq "all") { yarn install-windows-test-app }
-          else { yarn install-windows-test-app --project-directory=. }
+          npm run build:windows
+          if ("${{ matrix.template }}" -eq "all") { npx install-windows-test-app }
+          else { npx install-windows-test-app --project-directory=. }
         working-directory: template-example
       - name: Install NuGet packages
         run: |
@@ -470,7 +470,7 @@ jobs:
       - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
       - name: Install npm dependencies
-        uses: ./.github/actions/yarn
+        uses: ./.github/actions/npm
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -48,7 +48,7 @@ async function makeProject(name, platforms, setupFiles = {}) {
 
   try {
     await fs.symlink(
-      path.resolve(__dirname, "..", "..", "example", "node_modules"),
+      path.resolve(__dirname, "..", "..", "node_modules"),
       path.join(packagePath, "node_modules"),
       "dir"
     );

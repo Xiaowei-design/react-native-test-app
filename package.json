@@ -50,7 +50,7 @@
     "url": "https://github.com/microsoft/react-native-test-app.git"
   },
   "scripts": {
-    "clean": "git clean -dfqx --exclude=.yarn/cache",
+    "clean": "git clean -dfqx",
     "codegen": "node scripts/generate-manifest.js",
     "format:c": "clang-format -i $(git ls-files '*.cpp' '*.h' '*.m' '*.mm')",
     "format:js": "prettier --write $(git ls-files '*.js' '*.yml' 'test/**/*.json')",
@@ -134,10 +134,12 @@
     "suggestion-bot": "^1.0.0",
     "typescript": "^4.0.0"
   },
-  "packageManager": "yarn@3.1.1",
-  "resolutions": {
+  "packageManager": "npm@8.3.2",
+  "overrides": {
     "eslint-plugin-react": "^7.26.0",
-    "npm/chalk": "^4.1.0"
+    "npm": {
+      "chalk": "^4.1.0"
+    }
   },
   "workspaces": [
     "example"
